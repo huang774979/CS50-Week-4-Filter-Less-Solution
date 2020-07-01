@@ -1,5 +1,6 @@
 #include "helpers.h"
 #include <math.h>
+#include <stdio.h>
 
 // Convert image to grayscale
 void grayscale(int height, int width, RGBTRIPLE image[height][width])
@@ -68,9 +69,78 @@ void reflect(int height, int width, RGBTRIPLE image[height][width])
     }
     return;
 }
+void flip(int height, int width, RGBTRIPLE image[height][width])
+{
+    for (int i = 0; i < width; i++)
+    {
+        for (int j = 0; j < height / 2; j++)
+        {
+            // swap j with width - j - 1
+            swap(&image[j][i].rgbtBlue, &image[height - j - 1][i].rgbtBlue);
+            swap(&image[j][i].rgbtRed, &image[height - j - 1][i].rgbtRed);
+            swap(&image[j][i].rgbtGreen, &image[height - j - 1][i].rgbtGreen);
+
+        }
+    }
+    return;
+}
 
 // Blur image
+
 void blur(int height, int width, RGBTRIPLE image[height][width])
 {
+RGBTRIPLE copy[height][width];
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            copy [i][j] = image[i][j];
+        }
+    }
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            int r = i - 1;
+            int c = j - 1;
+            int w = 3;
+            int h = 3;
+            if (r < 0)
+            {
+                r = 0;
+                h--;
+            }
+            if (c < 0)
+            {
+                c = 0;
+                w--;
+            }
+            if (c + w > width)
+            {
+                w--;
+            }
+            if (r + h > height)
+            {
+                h--;
+            }
+            //printf("%d %d %d %d %d %d\n", i, j, r, c, w, h);
+            int blue = 0;
+            int green = 0;
+            int red = 0;
+            for (int k = 0; k < h; k++)
+            {
+                for (int m = 0; m < w; m++)
+                {
+                    blue += copy[r + k][c + m].rgbtBlue;
+                    red += copy[r + k][c + m].rgbtRed;
+                    green += copy[r + k][c + m].rgbtGreen;
+                }
+            }
+            image [i][j].rgbtBlue = round(1.0*blue / (w * h));
+            image [i][j].rgbtGreen = round(1.0*green / (w * h));
+            image [i][j].rgbtRed = round(1.0*red / (w * h));
+            //printf("Assign Values %d %d %d\n", image [i][j].rgbtBlue, blue, w*h);
+        }
+    }
     return;
 }
